@@ -25,23 +25,21 @@ Acione a skill quando o trabalho envolver, por exemplo:
 
 ## Instalação
 
-### Cursor
-
-Clone ou copie este repositório para o diretório de skills do projeto ou do usuário:
+Na raiz do projeto ou no ambiente global:
 
 ```bash
-# skill no projeto (recomendado para o time)
-git clone git@github.com:Dione-b/lgpd-reviewer-skill.git .cursor/skills/lgpd-reviewer
-
-# ou skill global
-git clone git@github.com:Dione-b/lgpd-reviewer-skill.git ~/.cursor/skills/lgpd-reviewer
+npx skills add mferreiradb/lgpd-reviewer-skill --skill lgpd-dev
 ```
 
-No chat, mencione a skill ou anexe `SKILL.md` na conversa. O agente deve carregar `references/report-format.md` ao gerar análises.
+No chat, mencione a skill `lgpd-dev` ou anexe `SKILL.md`. O agente deve carregar `references/report-format.md` ao gerar análises.
+
+### Instalação manual
+
+Se preferir clonar o repositório, mantenha a mesma estrutura de pastas que o comando acima criaria (skill `lgpd-dev` com `SKILL.md` e `references/`).
 
 ### Claude Code / Codex
 
-Copie a pasta para o namespace de skills do agente (ex.: `~/.claude/skills/lgpd-reviewer` ou `~/.agents/skills/lgpd-reviewer`), mantendo a estrutura abaixo.
+Use o mesmo pacote (`mferreiradb/lgpd-reviewer-skill`) no mecanismo de skills do agente, ou copie a pasta instalada para `~/.claude/skills/lgpd-dev` / `~/.agents/skills/lgpd-dev`.
 
 ## Estrutura do repositório
 
