@@ -1,14 +1,6 @@
 ---
 name: lgpd-dev
-version: "1.0.0"
-description: >
-  Use ao modelar/alterar entidades com dados pessoais (CPF, RG, e-mail,
-  telefone, endereço, IP, geolocalização, foto, data de nascimento, saúde,
-  biometria, genético, raça, religião, política, sindicato, sexualidade),
-  adicionar coleta/compartilhamento/exportação de dados, definir base legal
-  (art. 7º ou art. 11), consentimento, retenção, direitos do titular (art. 18),
-  auditar schema.prisma / migrations / DTOs procurando dados pessoais não
-  classificados, ou planejar adequação LGPD (Lei 13.709/2018).
+description: Use ao analisar ou planejar adequação de uma aplicação à LGPD (Lei 13.709/2018) — modelar/alterar entidades com dados pessoais (CPF, RG, e-mail, telefone, saúde, biometria), adicionar coleta/compartilhamento/exportação de dados, definir base legal, retenção, consentimento, direitos do titular, ou auditar schema.prisma / migrations em busca de dados pessoais.
 ---
 
 # lgpd-dev
@@ -36,6 +28,30 @@ Use quando o trabalho envolver:
 **Não use para:** dados que não se referem a pessoa natural identificada/identificável (métricas agregadas anônimas, dados de máquina sem vínculo a indivíduo).
 
 ## Fluxo de análise (siga em ordem)
+
+```dot
+digraph lgpd {
+  "Operação toca dado pessoal?" [shape=diamond];
+  "1. Classificar campos" [shape=box];
+  "2. Sensível?" [shape=diamond];
+  "3a. Base legal art. 11" [shape=box];
+  "3b. Base legal art. 7º" [shape=box];
+  "4. Mapear ciclo de vida" [shape=box];
+  "5. Direitos do titular" [shape=box];
+  "6. Planejar implementação" [shape=box];
+  "Fora de escopo LGPD" [shape=box];
+
+  "Operação toca dado pessoal?" -> "Fora de escopo LGPD" [label="não"];
+  "Operação toca dado pessoal?" -> "1. Classificar campos" [label="sim"];
+  "1. Classificar campos" -> "2. Sensível?";
+  "2. Sensível?" -> "3a. Base legal art. 11" [label="sim"];
+  "2. Sensível?" -> "3b. Base legal art. 7º" [label="não"];
+  "3a. Base legal art. 11" -> "4. Mapear ciclo de vida";
+  "3b. Base legal art. 7º" -> "4. Mapear ciclo de vida";
+  "4. Mapear ciclo de vida" -> "5. Direitos do titular";
+  "5. Direitos do titular" -> "6. Planejar implementação";
+}
+```
 
 1. **Classificar cada campo** — pessoal comum, pessoal sensível, ou não-pessoal. Use `references/field-taxonomy.md`. Na dúvida entre comum e sensível, trate como sensível.
 2. **Determinar sensibilidade** — qualquer campo de saúde/biometria/genético/raça/religião/política/sindicato/sexualidade ⇒ regime do art. 11 (mais restrito).
@@ -95,4 +111,4 @@ Sempre rode o script antes de afirmar que um schema está mapeado — não confi
 - `references/nodejs.md` — padrões NestJS/Prisma/TypeScript
 - `scripts/audit-schema.js` — scanner determinístico de schema.prisma
 
-Base normativa: Lei nº 13.709/2018 (LGPD); Resolução CD/ANPD nº 15/2024 (incidentes); Guia de Boas Práticas ANPD.
+Base normativa: Lei nº 13.709/2018 (LGPD); Guia LGPD MCTI; ABNT NBR ISO/IEC 27001, 27002:2022, 27701:2020.
