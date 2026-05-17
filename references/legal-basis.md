@@ -68,7 +68,9 @@ Após o término: eliminar, salvo conservação autorizada para obrigação lega
 
 ## Saída esperada
 
-Para cada operação, registre:
+Registre bases legais na **seção 2** do relatório (`references/report-format.md`) ou, se preferir detalhar por operação antes da classificação por campo:
 
-| Operação | Finalidade específica | Categoria do dado | Base legal | Artigo | Retenção | Observações (LIA / consentimento / compartilhamento) |
+| Operação | Finalidade específica | Categoria do dado | Base legal | Artigo | Retenção | Observações |
 |---|---|---|---|---|---|---|
+
+Lacunas de ciclo de vida: **seções 3 e 4** do relatório (`references/report-format.md`) — grade `Fase | Estado`, quatro linhas fixas.

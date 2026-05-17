@@ -60,13 +60,10 @@ Não é categoria sensível formal, mas tem regime próprio: tratamento no **mel
 
 ## Saída esperada da classificação
 
-Para cada entidade analisada, produza uma tabela:
+Use a tabela da **seção 2** em `references/report-format.md` (não invente colunas adicionais sem necessidade).
 
-| Campo | Categoria | Base legal (operação) | Retenção | Minimizar? | Em logs? |
-|---|---|---|---|---|---|
-
-- **Minimizar?** = o campo é necessário para a finalidade declarada? Se não, recomende remover (princípio da necessidade, art. 6º-III).
-- **Em logs?** = campo aparece em log/trace/analytics? Se sim e for PII/sensível, sinalize como vazamento.
+- **Minimizar?** = necessário para a finalidade? Se não, recomende remover (art. 6º-III).
+- **Em logs?** = aparece em log/trace/analytics? PII/sensível em log ⇒ vazamento.
 
 ## Pontos de atenção recorrentes
 

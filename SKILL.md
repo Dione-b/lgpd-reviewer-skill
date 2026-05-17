@@ -1,114 +1,58 @@
 ---
-name: lgpd-dev
-description: Use ao analisar ou planejar adequação de uma aplicação à LGPD (Lei 13.709/2018) — modelar/alterar entidades com dados pessoais (CPF, RG, e-mail, telefone, saúde, biometria), adicionar coleta/compartilhamento/exportação de dados, definir base legal, retenção, consentimento, direitos do titular, ou auditar schema.prisma / migrations em busca de dados pessoais.
+name: lgpd-reviewer
+description: Use quando o trabalho envolver dados pessoais ou sensíveis (CPF, e-mail, saúde, biometria), coleta/compartilhamento/transferência internacional, consentimento, retenção, direitos do titular (art. 18), incidentes de segurança, ou auditoria de schema.prisma/migrations/DTOs sem mapeamento LGPD explícito.
 ---
 
-# lgpd-dev
+# lgpd-reviewer
 
 ## Overview
 
-Analisa e planeja a adequação de aplicações à **LGPD** (Lei nº 13.709/2018). Não gera apenas código: primeiro classifica os dados, escolhe a base legal correta por operação, e só então planeja a implementação.
+Adequação à **LGPD** (Lei 13.709/2018): base legal e ciclo de vida **antes** de código.
 
-**Princípio central:** *toda operação com dado pessoal precisa de uma base legal explícita (art. 7º ou art. 11) ANTES de existir código.* Sem base legal mapeada, o tratamento é ilegal — não importa quão limpo seja o código.
+**Princípio:** base legal explícita por **operação**, não por entidade.
 
 ## When to Use
 
-Use quando o trabalho envolver:
+PII/sensível em modelos, APIs, formulários, logs; consentimento, retenção, expurgo; direitos art. 18; transferência internacional; incidentes; auditoria Prisma/migrations/DTOs.
 
-- Modelar/alterar entidade ou tabela que contém dado de pessoa natural (nome, CPF, RG, e-mail, telefone, endereço, geolocalização, IP, foto, data de nascimento)
-- Campos sensíveis: saúde, biometria, genético, raça/etnia, religião, opinião política, filiação sindical, vida/orientação sexual (art. 5º-II)
-- Adicionar coleta, formulário, importação, integração, log que capture dado pessoal
-- Compartilhamento/exportação/transferência (inclusive internacional) de dados
-- Consentimento, revogação, política de privacidade, termos
-- Retenção, expurgo, anonimização, pseudonimização
-- Implementar direitos do titular (acesso, correção, eliminação, portabilidade — art. 18)
-- Resposta a incidente de segurança / notificação ANPD (art. 48)
-- Auditar `schema.prisma`, migrations ou DTOs procurando dado pessoal não mapeado
+## Fluxo (ordem fixa)
 
-**Não use para:** dados que não se referem a pessoa natural identificada/identificável (métricas agregadas anônimas, dados de máquina sem vínculo a indivíduo).
+1. Classificar — `references/field-taxonomy.md`
+2. Base legal — `references/legal-basis.md`
+3. Ciclo de vida — quatro fases fixas (ver formato)
+4. Direitos do titular — art. 18
+5. **Relatório tabular** — `references/report-format.md` (**obrigatório**)
+6. Implementar — `references/nodejs.md` (se Node)
 
-## Fluxo de análise (siga em ordem)
+## Formato de saída (obrigatório)
 
-```dot
-digraph lgpd {
-  "Operação toca dado pessoal?" [shape=diamond];
-  "1. Classificar campos" [shape=box];
-  "2. Sensível?" [shape=diamond];
-  "3a. Base legal art. 11" [shape=box];
-  "3b. Base legal art. 7º" [shape=box];
-  "4. Mapear ciclo de vida" [shape=box];
-  "5. Direitos do titular" [shape=box];
-  "6. Planejar implementação" [shape=box];
-  "Fora de escopo LGPD" [shape=box];
+**REQUIRED:** Carregue `references/report-format.md`. A análise **só está completa** com as tabelas abaixo — conteúdo varia por projeto; **estrutura não**.
 
-  "Operação toca dado pessoal?" -> "Fora de escopo LGPD" [label="não"];
-  "Operação toca dado pessoal?" -> "1. Classificar campos" [label="sim"];
-  "1. Classificar campos" -> "2. Sensível?";
-  "2. Sensível?" -> "3a. Base legal art. 11" [label="sim"];
-  "2. Sensível?" -> "3b. Base legal art. 7º" [label="não"];
-  "3a. Base legal art. 11" -> "4. Mapear ciclo de vida";
-  "3b. Base legal art. 7º" -> "4. Mapear ciclo de vida";
-  "4. Mapear ciclo de vida" -> "5. Direitos do titular";
-  "5. Direitos do titular" -> "6. Planejar implementação";
-}
-```
-
-1. **Classificar cada campo** — pessoal comum, pessoal sensível, ou não-pessoal. Use `references/field-taxonomy.md`. Na dúvida entre comum e sensível, trate como sensível.
-2. **Determinar sensibilidade** — qualquer campo de saúde/biometria/genético/raça/religião/política/sindicato/sexualidade ⇒ regime do art. 11 (mais restrito).
-3. **Escolher base legal por operação** (não por entidade — coleta, uso e compartilhamento podem ter bases distintas). Carregue `references/legal-basis.md`.
-4. **Mapear ciclo de vida**: Coleta → Retenção → Processamento → Compartilhamento → Eliminação. Para cada fase, identifique ativos (sistema, banco, documento, equipamento, local físico, unidade) e medidas de segurança.
-5. **Direitos do titular** — verifique se a aplicação consegue atender art. 18 sobre os dados afetados (acesso, correção, eliminação, portabilidade, revogação de consentimento, info de compartilhamento).
-6. **Planejar implementação** — só agora desça para código. Stack Node/NestJS/Prisma: `references/nodejs.md`.
-
-## Taxonomia resumida (detalhe em field-taxonomy.md)
-
-| Categoria | Exemplos | Regime |
+| Seção | Tipo | Estrutura |
 |---|---|---|
-| Pessoal comum | nome, CPF, RG, e-mail, telefone, endereço, data nasc., IP, cookie ID, geolocalização | art. 7º |
-| Pessoal sensível | saúde, biometria, genético, raça/etnia, religião, opinião política, sindicato, vida/orientação sexual | art. 11 (restrito) |
-| Anonimizado | sem reidentificação razoável | fora da LGPD (enquanto irreversível) |
-| Pseudonimizado | reidentificável com chave separada | ainda é dado pessoal |
+| 1 | texto | Resumo executivo |
+| 2 | **tabela** | `Campo/Fonte` \| `Categoria` \| `Base legal` \| `Retenção` \| `Minimizar?` \| `Em logs?` |
+| 2.1 | **tabela** | `Operação` \| `Finalidade` \| `Categoria` \| `Base legal` \| `Artigo` \| `Retenção` |
+| **3** | **tabela** | **`Fase` \| `Estado`** — 4 linhas fixas: Coleta, Retenção, Compartilhamento, Eliminação |
+| **4** | **tabela** | **mesma grade `Fase` \| `Estado`** + linha `Veredito geral:` |
+| 4.1 | tabela (opcional) | `Dimensão` \| `Resultado` |
+| 5 | tabela (se ≠ CONFORME) | `Prioridade` \| `Ação` \| `Fase/Artigo` \| `Esforço` |
 
-## Árvore de base legal (resumo — detalhe em legal-basis.md)
+**Marcadores:** terminar células `Estado`/`Resultado` com `✅` `⚠️` `❌`.
 
-**Dado comum (art. 7º)** — escolha a PRIMEIRA aplicável, nesta ordem de preferência para reduzir risco:
-1. Cumprimento de obrigação legal/regulatória → não precisa consentimento
-2. Execução de contrato (a pedido do titular) → não precisa consentimento
-3. Exercício regular de direitos / processo judicial-admin-arbitral
-4. Proteção da vida ou incolumidade física
-5. Tutela da saúde (só profissional/serviço de saúde/autoridade sanitária)
-6. Políticas públicas / estudo por órgão de pesquisa (setor público/pesquisa)
-7. Legítimo interesse do controlador → exige teste de balanceamento + só dados necessários
-8. Proteção do crédito
-9. **Consentimento** → último recurso (revogável, ônus da prova do controlador)
+**Proibido:** listas ou prosa no lugar das tabelas das seções 2, 2.1, 3, 4; alterar nomes/ordem das quatro fases; encerrar sem seções 3 e 4.
 
-**Dado sensível (art. 11)** — bases MAIS restritas: consentimento *específico e destacado*, OU sem consentimento apenas para obrigação legal, política pública, pesquisa, exercício de direitos, proteção da vida, tutela da saúde (agente de saúde), garantia contra fraude/segurança do titular. **Não existe "legítimo interesse" para dado sensível.**
+Múltiplos escopos ⇒ repetir tabelas 3 e 4 com subtítulo por escopo.
 
-## Auditoria automatizada
+## Auditoria Prisma
 
-Para escanear um schema Prisma e listar campos potencialmente pessoais/sensíveis NÃO classificados, rode:
-
-```
-node scripts/audit-schema.js caminho/para/schema.prisma
-```
-
-Sempre rode o script antes de afirmar que um schema está mapeado — não confie em leitura visual para isso.
-
-## Erros comuns
-
-- **Escolher base legal por entidade, não por operação.** Coletar e compartilhar exigem análise separada.
-- **Usar consentimento como padrão.** É a base mais frágil (revogável). Prefira obrigação legal/contrato quando cabível.
-- **Tratar campo sensível como comum.** Saúde/biometria mudam o regime inteiro (art. 11, sem legítimo interesse).
-- **Esquecer ciclo de vida.** Retenção sem prazo e ausência de expurgo violam necessidade/eliminação (arts. 15-16).
-- **Ignorar direitos do titular no design.** Se o schema não permite eliminar/exportar por titular, viola art. 18.
-- **Log/observabilidade vazando PII.** Logs com CPF/e-mail são tratamento de dado pessoal.
-- **Descer para código antes de mapear base legal.** Código correto sobre tratamento ilegal continua ilegal.
+`node scripts/audit-schema.js caminho/schema.prisma`
 
 ## Referências
 
-- `references/field-taxonomy.md` — classificação exaustiva de campos
-- `references/legal-basis.md` — base legal por operação/contexto (art. 7º e art. 11 detalhados)
-- `references/nodejs.md` — padrões NestJS/Prisma/TypeScript
-- `scripts/audit-schema.js` — scanner determinístico de schema.prisma
-
-Base normativa: Lei nº 13.709/2018 (LGPD); Guia LGPD MCTI; ABNT NBR ISO/IEC 27001, 27002:2022, 27701:2020.
+| Tema | Arquivo |
+|---|---|
+| **Formato do relatório** | **`references/report-format.md`** |
+| Classificação | `references/field-taxonomy.md` |
+| Base legal | `references/legal-basis.md` |
+| Node/Nest/Prisma | `references/nodejs.md` |
